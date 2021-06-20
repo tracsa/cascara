@@ -223,6 +223,7 @@ export default {
         id: user.id,
         fullname: user.fullname,
         email: user.email,
+        identifier: user.identifier,
       })).sort((a, b) => (a.fullname > b.fullname ? 1 : -1));
     },
 
