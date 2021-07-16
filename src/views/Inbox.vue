@@ -180,6 +180,8 @@
 import moment from 'moment';
 import _ from 'lodash';
 
+import { EventBus } from '../event-bus';
+
 export default {
   props: {
     title: {
@@ -201,8 +203,6 @@ export default {
 
   data() {
     return {
-      timeoutId: null,
-
       selectedFeed: this.feed,
       selectedExecution: this.executionId,
       searchText: this.query || '',
@@ -227,14 +227,6 @@ export default {
     };
   },
 
-  created() {
-    this.timeoutId = setInterval(this.loadRecent, 10000);
-  },
-
-  destroyed() {
-    clearTimeout(this.timeoutId);
-  },
-
   computed: {
     showLeft() {
       return (
@@ -256,6 +248,10 @@ export default {
   },
 
   methods: {
+    handleMessage() {
+      this.loadRecent();
+    },
+
     handleSelectSearch: _.debounce(function handleSelectSearch() {
       const vm = this;
 
@@ -500,6 +496,20 @@ export default {
 
       this.$router.push(newRoute);
     },
+  },
+
+  mounted() {
+    EventBus.$on('execution_update', this.handleMessage);
+    EventBus.$on('execution_delete', this.handleMessage);
+    EventBus.$on('execution_patch', this.handleMessage);
+    EventBus.$on('execution_create', this.handleMessage);
+  },
+
+  beforeDestroy() {
+    EventBus.$off('execution_update', this.handleMessage);
+    EventBus.$off('execution_delete', this.handleMessage);
+    EventBus.$off('execution_patch', this.handleMessage);
+    EventBus.$off('execution_create', this.handleMessage);
   },
 
   watch: {

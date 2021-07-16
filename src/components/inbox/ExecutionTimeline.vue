@@ -13,7 +13,7 @@
     </div>
 
     <div
-      v-else
+      v-else-if="execution.data"
     >
       <app-execution-card
         :execution="execution.data"
@@ -95,6 +95,9 @@
 
 <script>
 import moment from 'moment';
+import _ from 'lodash';
+
+import { EventBus } from '../../event-bus';
 
 export default {
   props: {
@@ -111,8 +114,6 @@ export default {
 
   data() {
     return {
-      timeoutId: null,
-
       execution: {
         data: null,
         loading: false,
@@ -138,16 +139,14 @@ export default {
     };
   },
 
-  created() {
-    this.timeoutId = setInterval(this.reloadExecution, 10000);
-  },
-
-  destroyed() {
-    clearTimeout(this.timeoutId);
-  },
-
   methods: {
-    reloadExecution() {
+    handleMessage(msg) {
+      if (this.execution && this.execution.data && msg.execution_id === this.execution.data.id) {
+        this.reloadExecution();
+      }
+    },
+
+    reloadExecution: _.debounce(function reloadExecution() {
       const vm = this;
       const executionId = vm.execution.data.id;
 
@@ -163,9 +162,9 @@ export default {
           vm.recentExecution.loading = false;
           vm.recentExecution.error = true;
         });
-    },
+    }, 250),
 
-    fetchExecution(executionId) {
+    fetchExecution: _.debounce(function fetchExecution(executionId) {
       const vm = this;
 
       vm.execution.loading = true;
@@ -181,9 +180,9 @@ export default {
           vm.execution.loading = false;
           vm.execution.error = true;
         });
-    },
+    }, 250),
 
-    fetchPointers(executionId) {
+    fetchPointers: _.debounce(function fetchPointers(executionId) {
       const vm = this;
 
       vm.pointers.loading = true;
@@ -203,9 +202,9 @@ export default {
           vm.pointers.loading = false;
           vm.pointers.error = true;
         });
-    },
+    }, 250),
 
-    fetchRecentPointers() {
+    fetchRecentPointers: _.debounce(function fetchRecentPointers() {
       const vm = this;
       const executionId = vm.execution.data.id;
 
@@ -224,7 +223,19 @@ export default {
         vm.recentPointers.loading = false;
         vm.recentPointers.error = true;
       });
-    },
+    }, 250),
+  },
+
+  mounted() {
+    EventBus.$on('execution_update', this.handleMessage);
+    EventBus.$on('execution_delete', this.handleMessage);
+    EventBus.$on('execution_patch', this.handleMessage);
+  },
+
+  beforeDestroy() {
+    EventBus.$off('execution_update', this.handleMessage);
+    EventBus.$off('execution_delete', this.handleMessage);
+    EventBus.$off('execution_patch', this.handleMessage);
   },
 
   watch: {
