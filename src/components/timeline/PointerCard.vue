@@ -142,6 +142,7 @@
             <timeline-pending
               v-else-if="isDoableByUser"
               :pointer-id="pointer.id"
+              :load-if-doable="loadIfDoable"
               @complete="$emit('complete')"
             />
           </div>
@@ -174,6 +175,10 @@ export default {
     showDetail: {
       type: Boolean,
       default: false,
+    },
+    loadIfDoable: {
+      type: Boolean,
+      default: true,
     },
   },
 

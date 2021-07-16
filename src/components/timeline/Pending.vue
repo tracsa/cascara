@@ -61,10 +61,10 @@
           >
             <span v-if="!visible">
               <icon :icon="['fas', 'caret-down']"/>
-              Mostrar tarea</span>
+              <b>Resolver tarea</b></span>
             <span v-else>
               <icon :icon="['fas', 'caret-up']"/>
-              Ocultar tarea</span>
+              <b>Dejar tarea para despues</b></span>
           </a>
         </div>
       </div>
@@ -82,6 +82,10 @@ export default {
     pointerId: {
       type: String,
       required: true,
+    },
+    loadIfDoable: {
+      type: Boolean,
+      default: true,
     },
   },
 
@@ -203,20 +207,24 @@ export default {
   },
 
   mounted() {
-    this.observer = new IntersectionObserver((entries) => {
-      const task = entries[0];
-      if (task.isIntersecting) {
-        this.showTask();
-        this.visible = true;
-        this.observer.disconnect();
-      }
-    });
+    if (this.loadIfDoable) {
+      this.observer = new IntersectionObserver((entries) => {
+        const task = entries[0];
+        if (task.isIntersecting) {
+          this.showTask();
+          this.visible = true;
+          this.observer.disconnect();
+        }
+      });
 
-    this.observer.observe(this.$el);
+      this.observer.observe(this.$el);
+    }
   },
 
   destroyed() {
-    this.observer.disconnect();
+    if (this.observer) {
+      this.observer.disconnect();
+    }
   },
 };
 </script>
