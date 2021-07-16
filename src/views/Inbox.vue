@@ -103,6 +103,7 @@
                     :pointer='item'
                     :executionClick='true'
                     :show-detail="!showRight"
+                    :load-if-doable="false"
                     v-on:complete="reloadPointer(item.id)"
                     v-on:click-execution="selectExecution($event);"
                   >
