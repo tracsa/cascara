@@ -3,6 +3,8 @@ import moment from 'moment';
 import 'whatwg-fetch';
 import VueMq from 'vue-mq';
 
+import VueSSE from 'vue-sse';
+
 import App from './App';
 import './components';
 import './views';
@@ -18,6 +20,8 @@ import ExecutionServicePlugin from './services/execution.service';
 Vue.use(UserServicePlugin);
 Vue.use(PointerServicePlugin);
 Vue.use(ExecutionServicePlugin);
+
+Vue.use(VueSSE);
 
 Vue.use(VueMq, {
   breakpoints: {
