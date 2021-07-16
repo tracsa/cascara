@@ -43,6 +43,7 @@
     "vue-i18n": "^7.8.1",
     "vue-mq": "^1.0.1",
     "vue-router": "^3.0.6",
+    "vue-sse": "^2.2.0",
     "vuejs-datepicker": "^0.9.29",
     "whatwg-fetch": "^2.0.4"
   },
