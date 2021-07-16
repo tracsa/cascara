@@ -5,7 +5,9 @@ function getUser(identifier) {
 
   return ApiService().get(
     `/v1/user/_identifier/${urlId}/info`,
-  );
+  )
+    .then(({ data }) => data)
+    .catch(error => Promise.reject(error));
 }
 
 export const userService = {
