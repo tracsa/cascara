@@ -40,7 +40,7 @@
                     <router-link
                       :to="{
                         name: 'dashboard',
-                        params: { identifier: form.user.identifier },
+                        query: { feed: 'userTasks', u: form.user.identifier },
                       }"
                     >
                       <icon :icon="['fa', 'user']" class="mr-1"/>
