@@ -16,8 +16,9 @@ export const routes = [
     path: 'inbox/:id',
     redirect: to => (
       {
-        name: 'general',
+        name: 'dashboard',
         query: {
+          feed: 'general',
           exe: to.params.id,
         },
       }
@@ -28,8 +29,9 @@ export const routes = [
     path: 'inbox/:id/:pid',
     redirect: to => (
       {
-        name: 'general',
+        name: 'dashboard',
         query: {
+          feed: 'general',
           exe: to.params.id,
           objType: 'pointer',
           searchText: to.params.pid,
