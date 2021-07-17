@@ -101,7 +101,7 @@
                     :is="itemComponent(item)"
                     :execution='item'
                     :pointer='item'
-                    :executionClick='true'
+                    :show-execution='true'
                     :show-detail="!showRight"
                     :load-if-doable="false"
                     v-on:complete="reloadPointer(item.id)"

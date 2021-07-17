@@ -11,12 +11,12 @@
       <div class="row no-gutters">
         <div
           class="col"
-          :class="{ 'text-truncate': executionClick }"
+          :class="{ 'text-truncate': showExecution }"
           :id="'ptr-title-' + pointer.id + '-' + uuid"
         >
           <b><app-md-render :raw-string="pointerName"/></b><br/>
           <a
-            v-if="executionClick"
+            v-if="showExecution"
             href="#"
             v-on:click.prevent="$emit('click-execution', pointer.execution.id)"
           >
@@ -33,7 +33,7 @@
         >
           <b><app-md-render :raw-string="pointerName"/></b><br/>
           <span
-            v-if="executionClick"
+            v-if="showExecution"
           >
             <small>En <b><app-md-render :raw-string="executionName"/></b></small>
           </span>
@@ -168,7 +168,7 @@ export default {
       type: Object,
       required: true,
     },
-    executionClick: {
+    showExecution: {
       type: Boolean,
       default: false,
     },
