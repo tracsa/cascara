@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-import availableRoutes from './routes.constants';
+import { availableRoutes } from './dashboard.constants';
 
 export const routes = [
   {

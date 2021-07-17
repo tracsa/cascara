@@ -22,7 +22,7 @@ function getCurrentUserUsername() {
   return '';
 }
 
-export const avilableRoutes = Object.freeze([
+export const availableRoutes = Object.freeze([
   {
     feed: 'myPendingTasks',
     title: () => `Mis tareas pendientes (${getCurrentUserFullname()})`,
@@ -103,4 +103,4 @@ export const avilableRoutes = Object.freeze([
   },
 ]);
 
-export default avilableRoutes;
+export default availableRoutes;
