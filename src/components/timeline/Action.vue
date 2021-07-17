@@ -37,15 +37,20 @@
                   v-bind:key="fIndex"
                 >
                   <div>
-                    <router-link
-                      :to="{
-                        name: 'dashboard',
-                        query: { feed: 'userTasks', u: form.user.identifier },
-                      }"
+                    <app-users-popover
+                      :target="actorsPopoverId"
+                      :title="'Usuario'"
+                      :users="[form.user]"
+                    />
+
+                    <a
+                      href="#"
+                      @click.prevent
+                      :id="actorsPopoverId"
                     >
                       <icon :icon="['fa', 'user']" class="mr-1"/>
                       <b>{{ form.user.fullname }}</b>
-                    </router-link>
+                    </a>
                     <span> llenó la siguiente información:</span>
                   </div>
 
@@ -141,6 +146,13 @@ export default {
     listForms() {
       const vm = this;
       return vm.forms.data.filter(form => vm.listInputs(form.inputs).length);
+    },
+
+    actorsPopoverId() {
+      const vm = this;
+      const modalId = `actors-popover-${vm.uuid}`;
+
+      return modalId;
     },
   },
 

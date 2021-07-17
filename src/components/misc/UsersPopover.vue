@@ -16,7 +16,11 @@
           :is="user.identifier ? 'router-link' : 'span'"
           :to="{
             name: 'dashboard',
-            query: { feed: 'userTasks', u: user.identifier },
+            query: {
+              feed: 'general',
+              nu: user.identifier,
+              au: user.identifier,
+            },
           }"
         >
           <icon :icon="['fa', 'user']" class="mr-1"/>

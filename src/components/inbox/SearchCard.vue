@@ -151,7 +151,7 @@ export default {
         { text: 'Cancelado', value: 'cancelled' },
       ],
 
-      searchUsers: false,
+      searchUsers: !!this.value.actoredUsers || !!this.value.notifiedUsers,
     };
   },
 

@@ -199,6 +199,8 @@ export default {
     },
     executionId: String,
     query: String,
+    notified: Array,
+    actored: Array,
     fixedPayload: Object,
   },
 
@@ -493,6 +495,20 @@ export default {
         delete newRoute.query.q;
       }
 
+      if (Array.isArray(this.searchForm.actoredUsers)
+        && this.searchForm.actoredUsers.length) {
+        newRoute.query.au = this.searchForm.actoredUsers.join(',');
+      } else {
+        delete newRoute.query.au;
+      }
+
+      if (Array.isArray(this.searchForm.notifiedUsers)
+        && this.searchForm.notifiedUsers.length) {
+        newRoute.query.nu = this.searchForm.notifiedUsers.join(',');
+      } else {
+        delete newRoute.query.nu;
+      }
+
       this.handleSelectSearch();
 
       this.$router.push(newRoute);
@@ -522,8 +538,8 @@ export default {
           (JSON.stringify(newVal) !== JSON.stringify(oldVal))
         ) {
           this.searchForm = {
-            actoredUsers: null,
-            notifiedUsers: null,
+            actoredUsers: this.actored || null,
+            notifiedUsers: this.notified || null,
             executionStatus: ['ongoing', 'finished', 'cancelled'],
             pointerStatus: ['ongoing', 'finished', 'cancelled'],
             objType: 'execution',
@@ -542,7 +558,6 @@ export default {
   beforeRouteUpdate(to, from, next) {
     this.selectedFeed = to.query.feed;
     this.selectedExecution = to.query.e;
-    this.searchText = to.query.q;
 
     next();
   },

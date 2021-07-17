@@ -22,7 +22,7 @@ function getCurrentUserUsername() {
   return '';
 }
 
-export const Routes = Object.freeze([
+export const avilableRoutes = Object.freeze([
   {
     feed: 'myPendingTasks',
     title: () => `Mis tareas pendientes (${getCurrentUserFullname()})`,
@@ -31,6 +31,7 @@ export const Routes = Object.freeze([
       objType: 'pointer',
       executionStatus: ['ongoing'],
       pointerStatus: ['ongoing'],
+      actoredUsers: null,
       notifiedUsers: () => [getCurrentUserUsername()],
     },
   },
@@ -95,16 +96,6 @@ export const Routes = Object.freeze([
     },
   },
   {
-    feed: 'userTasks',
-    title: to => `Tareas de ${to.query.u}`,
-    description: 'Todas las tareas de un usuario',
-    fixedPayload: {
-      objType: 'pointer',
-      actoredUsers: to => [to.query.u],
-      notifiedUsers: to => [to.query.u],
-    },
-  },
-  {
     feed: 'general',
     title: 'Tablero general',
     description: 'Aquí tienes todos los filtros para buscar',
@@ -112,4 +103,4 @@ export const Routes = Object.freeze([
   },
 ]);
 
-export default { Routes };
+export default avilableRoutes;
