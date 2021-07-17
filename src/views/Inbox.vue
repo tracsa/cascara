@@ -106,6 +106,7 @@
                     :load-if-doable="false"
                     v-on:complete="reloadPointer(item.id)"
                     v-on:click-execution="selectExecution($event);"
+                    v-on:click-username="handleUsernameClick($event);"
                   >
                     <template v-slot:content
                       v-if="item.execution && item.execution.id"
@@ -169,6 +170,7 @@
             <app-inbox-execution-timeline
               :execution-id="selectedExecution"
               v-on:complete="reloadPointer($event)"
+              v-on:click-username="handleUsernameClick($event);"
             />
           </div>
         </slot>

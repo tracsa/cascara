@@ -73,6 +73,7 @@
             :target="actorsPopoverId"
             :title="'Usuarios que realizaron tareas'"
             :users="actors"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <a

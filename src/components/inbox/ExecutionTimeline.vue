@@ -18,6 +18,7 @@
       <app-execution-card
         :execution="execution.data"
         :show-detail="true"
+        v-on:click-username="$emit('click-username', $event);"
       />
 
       <hr class="my-4"/>
@@ -72,6 +73,7 @@
             :pointer='item'
             :show-detail="true"
             v-on:complete="$emit('complete', item.id), reloadExecution()"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <div

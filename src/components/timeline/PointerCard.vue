@@ -92,6 +92,7 @@
             :target="assigneesPopoverId"
             :title="'Usuarios asignados'"
             :users="assignees"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <span v-else>
@@ -107,6 +108,7 @@
             :target="actorsPopoverId"
             :title="'Usuarios que realizaron tareas'"
             :users="actors"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <a
@@ -137,6 +139,7 @@
               v-if="['finished', 'cancelled'].includes(pointer.state)"
               :pointer-id="pointer.id"
               :execution-id="pointer.execution.id"
+              v-on:click-username="$emit('click-username', $event);"
             />
 
             <timeline-pending

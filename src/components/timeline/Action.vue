@@ -41,6 +41,7 @@
                       :target="actorsPopoverId"
                       :title="'Usuario'"
                       :users="[form.user]"
+                      v-on:click-username="$emit('click-username', $event);"
                     />
 
                     <a

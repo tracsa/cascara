@@ -13,15 +13,9 @@
         :key="user.identifier"
       >
         <component
-          :is="user.identifier ? 'router-link' : 'span'"
-          :to="{
-            name: 'dashboard',
-            query: {
-              feed: 'general',
-              nu: user.identifier,
-              au: user.identifier,
-            },
-          }"
+          href="#"
+          :is="user.identifier ? 'a' : 'span'"
+          v-on:click.prevent="handleUsernameClick(user.identifier)"
         >
           <icon :icon="['fa', 'user']" class="mr-1"/>
           <b>{{ user.fullname }}</b>
@@ -52,6 +46,14 @@ export default {
     target: {
       type: String,
       required: true,
+    },
+  },
+
+  methods: {
+    handleUsernameClick(username) {
+      if (username) {
+        this.$emit('click-username', username);
+      }
     },
   },
 };
