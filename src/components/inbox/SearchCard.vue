@@ -109,6 +109,7 @@
     <b-form-group
       v-if="(
         typeof fixedArgs.notifiedUsers === 'undefined' &&
+        value.objType === 'pointer' &&
         searchUsers
       )"
     >
