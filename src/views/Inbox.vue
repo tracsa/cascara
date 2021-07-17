@@ -54,11 +54,27 @@
 
                   <hr/>
 
-                  <app-inbox-search-card
-                    :fixed-args="fixedPayload"
-                    v-model="searchForm"
-                    v-on:submit="submitForm"
-                  />
+                  <b-collapse :id="collapseId" v-model="visible">
+                    <app-inbox-search-card
+                      :fixed-args="fixedPayload"
+                      v-model="searchForm"
+                      v-on:submit="submitForm"
+                    />
+                  </b-collapse>
+
+                  <div class="w-100 text-center">
+                    <a
+                      v-b-toggle="collapseId"
+                      href="#"
+                    >
+                      <span v-if="!visible">
+                        <icon :icon="['fas', 'caret-down']"/>
+                        Mostrar controles de busqueda</span>
+                      <span v-else>
+                        <icon :icon="['fas', 'caret-up']"/>
+                        Ocultar controles de busqueda</span>
+                    </a>
+                  </div>
                 </b-card>
               </div>
             </div>
@@ -209,6 +225,9 @@ export default {
 
   data() {
     return {
+      uuid: Math.random(),
+      visible: false,
+
       baseForm: {
         searchText: '',
         objType: 'execution',
@@ -243,6 +262,13 @@ export default {
   },
 
   computed: {
+    collapseId() {
+      const vm = this;
+      const modalId = `collapse-${vm.uuid}`;
+
+      return modalId;
+    },
+
     showLeft() {
       return (
         (this.showRight === false && (this.$mq === 'md' || this.$mq === 'lg')) ||
