@@ -31,7 +31,8 @@ export const routes = [
         name: 'general',
         query: {
           exe: to.params.id,
-          ptr: to.params.pid,
+          objType: 'pointer',
+          searchText: to.params.pid,
         },
       }
     ),
