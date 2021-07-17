@@ -50,6 +50,11 @@
             <div class="row no-gutters mb-3">
               <div class="col">
                 <b-card>
+                  <span v-if="searchForm && searchForm.searchText">
+                    Buscando: <b>"{{ searchForm.searchText }}"</b>
+                    <hr/>
+                  </span>
+
                   <b-collapse :id="collapseId" v-model="visible">
                     <app-inbox-search-card
                       :fixed-args="fixedPayload"
