@@ -2,6 +2,7 @@
   <div>
     <label :for="inputId">{{ label }}</label>
     <b-form-tags
+      :disabled="disabled"
       :placeholder="placeholder"
       :value="value"
       @input="onInput"
@@ -22,6 +23,9 @@ export default {
     },
     placeholder: {
       type: String,
+    },
+    disabled: {
+      type: Boolean,
     },
   },
 
