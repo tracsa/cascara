@@ -29,7 +29,7 @@
       >
         <slot name="left">
           <app-inbox-sidebar
-            :selected-search="selectedFeed"
+            :selected-search="feed"
             v-on:click-feed="selectFeed($event)"
           />
         </slot>
@@ -168,7 +168,7 @@
             </div>
 
             <app-inbox-execution-timeline
-              :execution-id="selectedExecution"
+              :execution-id="executionId"
               v-on:complete="reloadPointer($event)"
               v-on:click-username="selectUser($event);"
             />
@@ -204,13 +204,23 @@ export default {
     notified: Array,
     actored: Array,
     fixedPayload: Object,
+    payload: Object,
   },
 
   data() {
     return {
-      selectedFeed: this.feed,
-      selectedExecution: this.executionId,
-      searchText: this.query || '',
+      baseForm: {
+        searchText: '',
+        objType: 'execution',
+        pointerStatus: ['ongoing', 'finished', 'cancelled'],
+        executionStatus: ['ongoing', 'finished', 'cancelled'],
+        minDate: null,
+        maxDate: null,
+        searchUsers: false,
+        notifiedUsers: null,
+        actoredUsers: null,
+      },
+
       searchForm: null, // built based on prop
 
       listItems: {
@@ -248,7 +258,7 @@ export default {
     },
 
     showRight() {
-      return !!this.selectedExecution;
+      return !!this.executionId;
     },
   },
 
@@ -257,8 +267,9 @@ export default {
       this.loadRecent();
     },
 
-    handleSelectSearch: _.debounce(function handleSelectSearch() {
+    handleSelectSearch: _.debounce(function handleSelectSearch(form) {
       const vm = this;
+      vm.searchForm = form;
 
       vm.listItems.data = [];
       vm.listItems.loading = true;
@@ -471,47 +482,110 @@ export default {
       };
 
       if (newExecution) {
-        newRoute.query.e = newExecution;
+        newRoute.query.exe = newExecution;
 
         const el = this.$refs.inboxTop;
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        delete newRoute.query.e;
+        delete newRoute.query.exe;
       }
 
       this.$router.push(newRoute);
     },
 
-    submitForm() {
+    selectUser(username) {
       const newRoute = {
         name: this.$route.name,
         params: { ...this.$route.params },
         query: { ...this.$route.query },
       };
 
-      if (this.searchForm.searchText) {
-        newRoute.query.q = this.searchForm.searchText;
+      newRoute.query.feed = 'general';
+
+      newRoute.query.objType = 'pointer';
+      newRoute.query.searchUsers = true;
+      newRoute.query.notifiedUsers = username;
+      newRoute.query.actoredUsers = username;
+
+      this.$router.push(newRoute);
+    },
+
+    submitForm(form) {
+      this.searchForm = form;
+      this.updateUrl(form);
+      this.handleSelectSearch(form);
+    },
+
+    updateUrl(form) {
+      const newRoute = {
+        name: this.$route.name,
+        params: { ...this.$route.params },
+        query: { ...this.$route.query },
+      };
+
+      if (form.searchText) {
+        newRoute.query.searchText = form.searchText;
       } else {
-        delete newRoute.query.q;
+        delete newRoute.query.searchText;
       }
 
-      if (Array.isArray(this.searchForm.actoredUsers)
-        && this.searchForm.actoredUsers.length) {
-        newRoute.query.au = this.searchForm.actoredUsers.join(',');
+      if (form.objType) {
+        newRoute.query.objType = form.objType;
       } else {
-        delete newRoute.query.au;
+        delete newRoute.query.objType;
       }
 
-      if (Array.isArray(this.searchForm.notifiedUsers)
-        && this.searchForm.notifiedUsers.length) {
-        newRoute.query.nu = this.searchForm.notifiedUsers.join(',');
+      if (Array.isArray(form.pointerStatus)
+        && form.pointerStatus.length) {
+        newRoute.query.pointerStatus = form.pointerStatus.join(',');
       } else {
-        delete newRoute.query.nu;
+        delete newRoute.query.pointerStatus;
       }
 
-      this.handleSelectSearch();
+      if (Array.isArray(form.executionStatus)
+        && form.executionStatus.length) {
+        newRoute.query.executionStatus = form.executionStatus.join(',');
+      } else {
+        delete newRoute.query.executionStatus;
+      }
+
+      if (form.minDate) {
+        newRoute.query.minDate = form.minDate;
+      } else {
+        delete newRoute.query.minDate;
+      }
+
+      if (form.maxDate) {
+        newRoute.query.maxDate = form.maxDate;
+      } else {
+        delete newRoute.query.maxDate;
+      }
+
+      if (form.searchUsers) {
+        newRoute.query.searchUsers = form.searchUsers;
+      } else {
+        delete newRoute.query.searchUsers;
+      }
+
+      if (Array.isArray(form.actoredUsers)
+        && form.actoredUsers.length) {
+        newRoute.query.actoredUsers = form.actoredUsers.join(',');
+      } else {
+        delete newRoute.query.actoredUsers;
+      }
+
+      if (Array.isArray(form.notifiedUsers)
+        && form.notifiedUsers.length) {
+        newRoute.query.notifiedUsers = form.notifiedUsers.join(',');
+      } else {
+        delete newRoute.query.notifiedUsers;
+      }
+
+      Object.keys(this.fixedPayload).forEach((k) => {
+        delete newRoute.query[k];
+      });
 
       this.$router.push(newRoute);
     },
@@ -539,29 +613,20 @@ export default {
           !oldVal ||
           (JSON.stringify(newVal) !== JSON.stringify(oldVal))
         ) {
-          this.searchForm = {
-            actoredUsers: this.actored || null,
-            notifiedUsers: this.notified || null,
-            executionStatus: ['ongoing', 'finished', 'cancelled'],
-            pointerStatus: ['ongoing', 'finished', 'cancelled'],
-            objType: 'execution',
-            searchText: this.query || '',
-            minDate: '',
-            maxDate: '',
-            ...newVal,
-          };
-
-          this.handleSelectSearch();
+          this.handleSelectSearch(Object.assign({}, this.baseForm, this.payload, newVal));
         }
       },
     },
-  },
-
-  beforeRouteUpdate(to, from, next) {
-    this.selectedFeed = to.query.feed;
-    this.selectedExecution = to.query.e;
-
-    next();
+    payload: {
+      handler(newVal, oldVal) {
+        if (
+          !oldVal ||
+          (JSON.stringify(newVal) !== JSON.stringify(oldVal))
+        ) {
+          this.handleSelectSearch(Object.assign({}, this.baseForm, newVal, this.fixedPayload));
+        }
+      },
+    },
   },
 };
 </script>

@@ -134,6 +134,17 @@ export default {
 
   data() {
     return {
+      baseForm: {
+        searchText: '',
+        objType: 'execution',
+        pointerStatus: ['ongoing', 'finished', 'cancelled'],
+        executionStatus: ['ongoing', 'finished', 'cancelled'],
+        minDate: null,
+        maxDate: null,
+        searchUsers: false,
+        notifiedUsers: null,
+        actoredUsers: null,
+      },
       searchForm: null,
 
       objTypeOptions: [
@@ -190,13 +201,13 @@ export default {
     fixedArgs: {
       immediate: true,
       handler(newVal) {
-        this.searchForm = Object.assign({}, this.value, newVal);
+        this.searchForm = Object.assign({}, this.baseForm, this.value, newVal);
       },
     },
 
     value: {
       handler(newVal) {
-        this.searchForm = Object.assign({}, newVal, this.fixedArgs);
+        this.searchForm = Object.assign({}, this.baseForm, newVal, this.fixedArgs);
       },
     },
   },
