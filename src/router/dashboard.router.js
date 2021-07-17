@@ -24,16 +24,41 @@ export const routes = [
       const actualRoute = availableRoutes.find(x => x.feed === to.query.feed);
 
       const actualProp = {
-        executionId: to.query.e,
-        query: to.query.q,
+        executionId: to.query.exe,
+        payload: {},
         fixedPayload: {},
       };
 
-      if (to.query.nu) {
-        actualProp.notified = (to.query.nu || '').split(',') || null;
+      if (to.query.searchText) {
+        actualProp.payload.searchText = to.query.searchText;
       }
-      if (to.query.au) {
-        actualProp.actored = (to.query.au || '').split(',') || null;
+      if (to.query.objType) {
+        actualProp.payload.objType = to.query.objType;
+      }
+      if (to.query.pointerStatus) {
+        actualProp.payload
+          .pointerStatus = to.query.pointerStatus.split(',');
+      }
+      if (to.query.executionStatus) {
+        actualProp.payload
+          .pointerStatus = to.query.executionStatus.split(',');
+      }
+      if (to.query.minDate) {
+        actualProp.payload.minDate = to.query.minDate;
+      }
+      if (to.query.maxDate) {
+        actualProp.payload.maxDate = to.query.maxDate;
+      }
+      if (to.query.searchUsers) {
+        actualProp.payload.searchUsers = to.query.searchUsers;
+      }
+      if (to.query.notifiedUsers) {
+        actualProp.payload
+          .notifiedUsers = to.query.notifiedUsers.split(',');
+      }
+      if (to.query.actoredUsers) {
+        actualProp.payload
+          .actoredUsers = to.query.actoredUsers.split(',');
       }
 
       [
@@ -54,6 +79,8 @@ export const routes = [
         } else {
           actualProp.fixedPayload[k] = actualRoute.fixedPayload[k];
         }
+
+        delete actualProp.payload[k];
       });
 
       return actualProp;

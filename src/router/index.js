@@ -45,8 +45,7 @@ export default new Router({
               name: 'dashboard',
               query: {
                 feed: 'myPendingTasks',
-                highlight: to.params.id,
-                q: to.params.id,
+                ptr: to.params.id,
               },
             }
           ),

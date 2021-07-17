@@ -1,7 +1,3 @@
-import Vue from 'vue';
-
-import availableRoutes from './dashboard.constants';
-
 export const routes = [
   {
     name: 'inbox',
@@ -20,10 +16,9 @@ export const routes = [
     path: 'inbox/:id',
     redirect: to => (
       {
-        name: 'dashboard',
+        name: 'general',
         query: {
-          e: to.params.id,
-          feed: 'myPendingTasks',
+          exe: to.params.id,
         },
       }
     ),
@@ -33,12 +28,10 @@ export const routes = [
     path: 'inbox/:id/:pid',
     redirect: to => (
       {
-        name: 'dashboard',
+        name: 'general',
         query: {
-          e: to.params.id,
-          feed: 'allTasks',
-          highlight: to.params.pid,
-          q: to.params.pid,
+          exe: to.params.id,
+          ptr: to.params.pid,
         },
       }
     ),

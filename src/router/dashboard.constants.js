@@ -1,17 +1,5 @@
 import { getAuthUser } from '../utils/auth';
 
-function getCurrentUserFullname() {
-  const user = getAuthUser();
-
-  if (user && user.fullname) {
-    return user.fullname;
-  } else if (user) {
-    return user.username;
-  }
-
-  return '';
-}
-
 function getCurrentUserUsername() {
   const user = getAuthUser();
 
@@ -25,26 +13,28 @@ function getCurrentUserUsername() {
 export const availableRoutes = Object.freeze([
   {
     feed: 'myPendingTasks',
-    title: () => `Mis tareas pendientes (${getCurrentUserFullname()})`,
+    title: 'Mis tareas pendientes',
     description: 'Aquí podrás ver las tareas que te faltan por realizar',
     fixedPayload: {
       objType: 'pointer',
       executionStatus: ['ongoing'],
       pointerStatus: ['ongoing'],
-      actoredUsers: null,
+      actoredUsers: [],
       notifiedUsers: () => [getCurrentUserUsername()],
+      searchUsers: true,
     },
   },
   {
     feed: 'myTasks',
-    title: () => `Tareas relacionadas conmigo (${getCurrentUserFullname()})`,
+    title: 'Tareas relacionadas conmigo',
     description: 'Estas son todas las tareas que te asignaron o realizaste',
     fixedPayload: {
       objType: 'pointer',
       actoredUsers: () => [getCurrentUserUsername()],
       notifiedUsers: () => [getCurrentUserUsername()],
-      pointerStatus: null,
-      executionStatus: null,
+      pointerStatus: ['ongoing', 'finished', 'cancelled'],
+      executionStatus: ['ongoing', 'finished', 'cancelled'],
+      searchUsers: true,
     },
   },
   {
