@@ -50,6 +50,19 @@
           <div class="container-fluid p-0">
             <div class="row no-gutters mb-3">
               <div class="col">
+                <b-card
+                  v-if="!showLeft"
+                  class="mb-3"
+                >
+                  <b-form-select
+                    @change="selectFeed($event)"
+                    @input="selectFeed($event)"
+                    text-field="label"
+                    :value="feed"
+                    :options="availableFeedOptions"
+                  />
+                </b-card>
+
                 <b-card>
                   <span v-if="searchForm && searchForm.searchText">
                     Buscando: <b>"{{ searchForm.searchText }}"</b>
@@ -58,6 +71,7 @@
 
                   <b-collapse :id="collapseId" v-model="visible">
                     <app-inbox-search-card
+                      class="mb-3"
                       :fixed-args="fixedPayload"
                       v-model="searchForm"
                       v-on:submit="submitForm"
