@@ -27,6 +27,10 @@ export const routes = [
         executionId: to.query.exe,
         payload: {},
         fixedPayload: {},
+        availableFeedOptions: availableRoutes.map(x => ({
+          label: typeof x.title === 'function' ? x.title(to) : x.title,
+          value: x.feed,
+        })),
       };
 
       if (to.query.searchText) {

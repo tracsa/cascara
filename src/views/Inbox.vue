@@ -30,6 +30,7 @@
         <slot name="left">
           <app-inbox-sidebar
             :selected-search="feed"
+            :search-options="availableFeedOptions"
             v-on:click-feed="selectFeed($event)"
           />
         </slot>
@@ -67,6 +68,7 @@
                     <a
                       v-b-toggle="collapseId"
                       href="#"
+                      @click.prevent
                     >
                       <span v-if="!visible">
                         <icon :icon="['fas', 'caret-down']"/>
@@ -222,6 +224,7 @@ export default {
     actored: Array,
     fixedPayload: Object,
     payload: Object,
+    availableFeedOptions: Array,
   },
 
   data() {
