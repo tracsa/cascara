@@ -50,10 +50,6 @@
             <div class="row no-gutters mb-3">
               <div class="col">
                 <b-card>
-                  <div>Buscar en <b>"{{ title }}"</b></div>
-
-                  <hr/>
-
                   <b-collapse :id="collapseId" v-model="visible">
                     <app-inbox-search-card
                       :fixed-args="fixedPayload"
