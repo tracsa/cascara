@@ -20,7 +20,7 @@
           <form
             method="post"
             action="/"
-            @submit="signIn($event)"
+            @submit.prevent="signIn()"
           >
             <div
               class="text-danger"
@@ -48,7 +48,10 @@
             </div>
 
             <small>
-              <a href="#" v-on:click="toggleAdvancedOptions">{{ $t('signin.advanced_options') }}</a>
+              <a
+                href="#"
+                v-on:click.prevent="toggleAdvancedOptions"
+              >{{ $t('signin.advanced_options') }}</a>
             </small>
 
             <div class="form-group" v-if="showAdvancedOptions">
@@ -78,7 +81,6 @@
 </template>
 
 <script>
-import { get } from '../utils/api';
 import { login } from '../utils/auth';
 
 export default {
@@ -93,23 +95,19 @@ export default {
       showAdvancedOptions: false,
       errorMessage: 'offline',
 
-      timer: null,
-      backendUrl: process.env.CACAHUATE_URL,
       online: true,
       showAlert: false,
+      sseClient: null,
+      sse: { cleanup: true },
     };
   },
 
   methods: {
-    toggleAdvancedOptions: function toggleAdvancedOptions(event) {
-      event.preventDefault();
-
+    toggleAdvancedOptions: function toggleAdvancedOptions() {
       this.showAdvancedOptions = !this.showAdvancedOptions;
     },
 
-    signIn: function signIn(event) {
-      event.preventDefault();
-
+    signIn: function signIn() {
       this.hasError = false;
       this.signingIn = true;
 
@@ -151,29 +149,38 @@ export default {
         $router.push(redirect);
       });
     },
-
-    checkOnline() {
-      const vm = this;
-
-      get('/execution?limit=1&include=_')
-        .then(() => {
-          vm.online = true;
-          vm.showAlert = false;
-        })
-        .catch(() => {
-          vm.online = false;
-          vm.showAlert = true;
-        });
-    },
   },
 
-  created() {
-    this.checkOnline();
-    this.timer = setInterval(this.checkOnline, 60000);
+  mounted() {
+    const vm = this;
+
+    if (process.env.SSE_ENABLED) {
+      vm.sseClient = vm.$sse.create({
+        format: 'json',
+        polyfill: true,
+        url: `${process.env.CACAHUATE_URL}/stream`,
+        withCredentials: true,
+      });
+
+      vm.sseClient.on('error', () => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
+
+      vm.sseClient.connect().then(() => {
+        vm.online = true;
+        vm.showAlert = false;
+      }).catch(() => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
+    }
   },
 
   beforeDestroy() {
-    clearInterval(this.timer);
+    if (this.sseClient) {
+      this.sseClient.disconnect();
+    }
   },
 };
 </script>

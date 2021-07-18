@@ -2,7 +2,8 @@
   <div>
     <label :for="inputId">{{ label }}</label>
     <b-form-tags
-      :placeholder="placeholder"
+      :disabled="disabled"
+      :placeholder="actualPlaceholder"
       :value="value"
       @input="onInput"
       :add-button-text="'Agregar'"
@@ -23,6 +24,9 @@ export default {
     placeholder: {
       type: String,
     },
+    disabled: {
+      type: Boolean,
+    },
   },
 
   data() {
@@ -34,6 +38,14 @@ export default {
   computed: {
     inputId() {
       return `input-${this.uuid}`;
+    },
+
+    actualPlaceholder() {
+      if (this.disabled) {
+        return '';
+      }
+
+      return this.placeholder;
     },
   },
 

@@ -11,12 +11,12 @@
       <div class="row no-gutters">
         <div
           class="col"
-          :class="{ 'text-truncate': executionClick }"
+          :class="{ 'text-truncate': showExecution }"
           :id="'ptr-title-' + pointer.id + '-' + uuid"
         >
           <b><app-md-render :raw-string="pointerName"/></b><br/>
           <a
-            v-if="executionClick"
+            v-if="showExecution"
             href="#"
             v-on:click.prevent="$emit('click-execution', pointer.execution.id)"
           >
@@ -33,7 +33,7 @@
         >
           <b><app-md-render :raw-string="pointerName"/></b><br/>
           <span
-            v-if="executionClick"
+            v-if="showExecution"
           >
             <small>En <b><app-md-render :raw-string="executionName"/></b></small>
           </span>
@@ -92,6 +92,7 @@
             :target="assigneesPopoverId"
             :title="'Usuarios asignados'"
             :users="assignees"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <span v-else>
@@ -107,6 +108,7 @@
             :target="actorsPopoverId"
             :title="'Usuarios que realizaron tareas'"
             :users="actors"
+            v-on:click-username="$emit('click-username', $event);"
           />
 
           <a
@@ -137,11 +139,13 @@
               v-if="['finished', 'cancelled'].includes(pointer.state)"
               :pointer-id="pointer.id"
               :execution-id="pointer.execution.id"
+              v-on:click-username="$emit('click-username', $event);"
             />
 
             <timeline-pending
               v-else-if="isDoableByUser"
               :pointer-id="pointer.id"
+              :load-if-doable="loadIfDoable"
               @complete="$emit('complete')"
             />
           </div>
@@ -167,13 +171,17 @@ export default {
       type: Object,
       required: true,
     },
-    executionClick: {
+    showExecution: {
       type: Boolean,
       default: false,
     },
     showDetail: {
       type: Boolean,
       default: false,
+    },
+    loadIfDoable: {
+      type: Boolean,
+      default: true,
     },
   },
 
@@ -223,6 +231,7 @@ export default {
         id: user.id,
         fullname: user.fullname,
         email: user.email,
+        identifier: user.identifier,
       })).sort((a, b) => (a.fullname > b.fullname ? 1 : -1));
     },
 

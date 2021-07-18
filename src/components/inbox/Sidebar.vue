@@ -18,41 +18,14 @@
 
 <script>
 export default {
-  props: ['selectedSearch'],
-
-  data() {
-    return {
-      searchOptions: [
-        {
-          value: 'myPendingTasks',
-          label: 'Mis tareas pendientes',
-        },
-        {
-          value: 'myTasks',
-          label: 'Tareas relacionadas conmigo',
-        },
-        {
-          value: 'allOngoingTasks',
-          label: 'Todas las tareas pendientes',
-        },
-        {
-          value: 'allOngoingExecutions',
-          label: 'Todos los flujos de autorización en curso',
-        },
-        {
-          value: 'executionHistory',
-          label: 'Historial de flujos de autorización',
-        },
-        {
-          value: 'taskHistory',
-          label: 'Historial de tareas',
-        },
-        {
-          value: 'general',
-          label: 'Tablero general',
-        },
-      ],
-    };
+  props: {
+    selectedSearch: {
+      type: String,
+    },
+    searchOptions: {
+      type: Array,
+      required: true,
+    },
   },
 };
 </script>

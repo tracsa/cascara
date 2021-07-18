@@ -29,7 +29,8 @@
       >
         <slot name="left">
           <app-inbox-sidebar
-            :selected-search="selectedFeed"
+            :selected-search="feed"
+            :search-options="availableFeedOptions"
             v-on:click-feed="selectFeed($event)"
           />
         </slot>
@@ -49,16 +50,48 @@
           <div class="container-fluid p-0">
             <div class="row no-gutters mb-3">
               <div class="col">
-                <b-card>
-                  <div>Buscar en <b>"{{ title }}"</b></div>
-
-                  <hr/>
-
-                  <app-inbox-search-card
-                    :fixed-args="fixedPayload"
-                    v-model="searchForm"
-                    v-on:submit="submitForm"
+                <b-card
+                  v-if="!showLeft"
+                  class="mb-3"
+                >
+                  <b-form-select
+                    @change="selectFeed($event)"
+                    @input="selectFeed($event)"
+                    text-field="label"
+                    :value="feed"
+                    :options="availableFeedOptions"
                   />
+                </b-card>
+
+                <b-card>
+                  <span v-if="searchForm && searchForm.searchText">
+                    Buscando: <b>"{{ searchForm.searchText }}"</b>
+                    <hr/>
+                  </span>
+
+                  <b-collapse :id="collapseId" v-model="visible">
+                    <app-inbox-search-card
+                      class="mb-3"
+                      :fixed-args="fixedPayload"
+                      v-model="searchForm"
+                      v-on:submit="submitForm"
+                    />
+                  </b-collapse>
+
+                  <div class="w-100 text-center">
+                    <a
+                      v-b-toggle="collapseId"
+                      href="#"
+                      @click.prevent
+                    >
+                      <span v-if="!visible">
+                        <icon :icon="['fas', 'caret-down']"/>
+                        Mostrar controles de busqueda</span>
+                      <span v-else>
+                        <icon :icon="['fas', 'caret-up']"/>
+                        Ocultar controles de busqueda</span>
+                    </a>
+                  </div>
                 </b-card>
               </div>
             </div>
@@ -101,10 +134,12 @@
                     :is="itemComponent(item)"
                     :execution='item'
                     :pointer='item'
-                    :executionClick='true'
+                    :show-execution='true'
                     :show-detail="!showRight"
+                    :load-if-doable="false"
                     v-on:complete="reloadPointer(item.id)"
                     v-on:click-execution="selectExecution($event);"
+                    v-on:click-username="selectUser($event);"
                   >
                     <template v-slot:content
                       v-if="item.execution && item.execution.id"
@@ -166,8 +201,9 @@
             </div>
 
             <app-inbox-execution-timeline
-              :execution-id="selectedExecution"
+              :execution-id="executionId"
               v-on:complete="reloadPointer($event)"
+              v-on:click-username="selectUser($event);"
             />
           </div>
         </slot>
@@ -179,6 +215,8 @@
 <script>
 import moment from 'moment';
 import _ from 'lodash';
+
+import { EventBus } from '../event-bus';
 
 export default {
   props: {
@@ -196,16 +234,30 @@ export default {
     },
     executionId: String,
     query: String,
+    notified: Array,
+    actored: Array,
     fixedPayload: Object,
+    payload: Object,
+    availableFeedOptions: Array,
   },
 
   data() {
     return {
-      timeoutId: null,
+      uuid: Math.random(),
+      visible: false,
 
-      selectedFeed: this.feed,
-      selectedExecution: this.executionId,
-      searchText: this.query || '',
+      baseForm: {
+        searchText: '',
+        objType: 'execution',
+        pointerStatus: ['ongoing', 'finished', 'cancelled'],
+        executionStatus: ['ongoing', 'finished', 'cancelled'],
+        minDate: null,
+        maxDate: null,
+        searchUsers: false,
+        notifiedUsers: null,
+        actoredUsers: null,
+      },
+
       searchForm: null, // built based on prop
 
       listItems: {
@@ -227,15 +279,14 @@ export default {
     };
   },
 
-  created() {
-    this.timeoutId = setInterval(this.loadRecent, 10000);
-  },
-
-  destroyed() {
-    clearTimeout(this.timeoutId);
-  },
-
   computed: {
+    collapseId() {
+      const vm = this;
+      const modalId = `collapse-${vm.uuid}`;
+
+      return modalId;
+    },
+
     showLeft() {
       return (
         (this.showRight === false && (this.$mq === 'md' || this.$mq === 'lg')) ||
@@ -251,13 +302,18 @@ export default {
     },
 
     showRight() {
-      return !!this.selectedExecution;
+      return !!this.executionId;
     },
   },
 
   methods: {
-    handleSelectSearch: _.debounce(function handleSelectSearch() {
+    handleMessage() {
+      this.loadRecent();
+    },
+
+    handleSelectSearch: _.debounce(function handleSelectSearch(form) {
       const vm = this;
+      vm.searchForm = form;
 
       vm.listItems.data = [];
       vm.listItems.loading = true;
@@ -470,36 +526,127 @@ export default {
       };
 
       if (newExecution) {
-        newRoute.query.e = newExecution;
+        newRoute.query.exe = newExecution;
 
         const el = this.$refs.inboxTop;
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        delete newRoute.query.e;
+        delete newRoute.query.exe;
       }
 
       this.$router.push(newRoute);
     },
 
-    submitForm() {
+    selectUser(username) {
       const newRoute = {
         name: this.$route.name,
         params: { ...this.$route.params },
         query: { ...this.$route.query },
       };
 
-      if (this.searchForm.searchText) {
-        newRoute.query.q = this.searchForm.searchText;
-      } else {
-        delete newRoute.query.q;
-      }
+      newRoute.query.feed = 'general';
 
-      this.handleSelectSearch();
+      newRoute.query.objType = 'pointer';
+      newRoute.query.searchUsers = true;
+      newRoute.query.notifiedUsers = username;
+      newRoute.query.actoredUsers = username;
 
       this.$router.push(newRoute);
     },
+
+    submitForm(form) {
+      this.searchForm = form;
+      this.updateUrl(form);
+      this.handleSelectSearch(form);
+    },
+
+    updateUrl(form) {
+      const newRoute = {
+        name: this.$route.name,
+        params: { ...this.$route.params },
+        query: { ...this.$route.query },
+      };
+
+      if (form.searchText) {
+        newRoute.query.searchText = form.searchText;
+      } else {
+        delete newRoute.query.searchText;
+      }
+
+      if (form.objType) {
+        newRoute.query.objType = form.objType;
+      } else {
+        delete newRoute.query.objType;
+      }
+
+      if (Array.isArray(form.pointerStatus)
+        && form.pointerStatus.length) {
+        newRoute.query.pointerStatus = form.pointerStatus.join(',');
+      } else {
+        delete newRoute.query.pointerStatus;
+      }
+
+      if (Array.isArray(form.executionStatus)
+        && form.executionStatus.length) {
+        newRoute.query.executionStatus = form.executionStatus.join(',');
+      } else {
+        delete newRoute.query.executionStatus;
+      }
+
+      if (form.minDate) {
+        newRoute.query.minDate = form.minDate;
+      } else {
+        delete newRoute.query.minDate;
+      }
+
+      if (form.maxDate) {
+        newRoute.query.maxDate = form.maxDate;
+      } else {
+        delete newRoute.query.maxDate;
+      }
+
+      if (form.searchUsers) {
+        newRoute.query.searchUsers = form.searchUsers;
+      } else {
+        delete newRoute.query.searchUsers;
+      }
+
+      if (Array.isArray(form.actoredUsers)
+        && form.actoredUsers.length) {
+        newRoute.query.actoredUsers = form.actoredUsers.join(',');
+      } else {
+        delete newRoute.query.actoredUsers;
+      }
+
+      if (Array.isArray(form.notifiedUsers)
+        && form.notifiedUsers.length) {
+        newRoute.query.notifiedUsers = form.notifiedUsers.join(',');
+      } else {
+        delete newRoute.query.notifiedUsers;
+      }
+
+      Object.keys(this.fixedPayload).forEach((k) => {
+        delete newRoute.query[k];
+      });
+
+      this.$router.push(newRoute);
+    },
+  },
+
+  mounted() {
+    EventBus.$on('execution_update', this.handleMessage);
+    EventBus.$on('execution_delete', this.handleMessage);
+    EventBus.$on('execution_patch', this.handleMessage);
+    EventBus.$on('execution_create', this.handleMessage);
+  },
+
+  beforeDestroy() {
+    EventBus.$off('execution_update', this.handleMessage);
+    EventBus.$off('execution_delete', this.handleMessage);
+    EventBus.$off('execution_patch', this.handleMessage);
+    EventBus.$off('execution_create', this.handleMessage);
   },
 
   watch: {
@@ -510,30 +657,20 @@ export default {
           !oldVal ||
           (JSON.stringify(newVal) !== JSON.stringify(oldVal))
         ) {
-          this.searchForm = {
-            actoredUsers: null,
-            notifiedUsers: null,
-            executionStatus: ['ongoing', 'finished', 'cancelled'],
-            pointerStatus: ['ongoing', 'finished', 'cancelled'],
-            objType: 'execution',
-            searchText: this.query || '',
-            minDate: '',
-            maxDate: '',
-            ...newVal,
-          };
-
-          this.handleSelectSearch();
+          this.handleSelectSearch(Object.assign({}, this.baseForm, this.payload, newVal));
         }
       },
     },
-  },
-
-  beforeRouteUpdate(to, from, next) {
-    this.selectedFeed = to.query.feed;
-    this.selectedExecution = to.query.e;
-    this.searchText = to.query.q;
-
-    next();
+    payload: {
+      handler(newVal, oldVal) {
+        if (
+          !oldVal ||
+          (JSON.stringify(newVal) !== JSON.stringify(oldVal))
+        ) {
+          this.handleSelectSearch(Object.assign({}, this.baseForm, newVal, this.fixedPayload));
+        }
+      },
+    },
   },
 };
 </script>
