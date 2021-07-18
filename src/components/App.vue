@@ -31,30 +31,32 @@ export default {
   mounted() {
     const vm = this;
 
-    vm.sseClient = vm.$sse.create({
-      format: 'json',
-      polyfill: true,
-      url: `${process.env.CACAHUATE_URL}/stream`,
-      withCredentials: false,
-    });
+    if (process.env.SSE_ENABLED) {
+      vm.sseClient = vm.$sse.create({
+        format: 'json',
+        polyfill: true,
+        url: `${process.env.CACAHUATE_URL}/stream`,
+        withCredentials: false,
+      });
 
-    vm.sseClient.on('error', () => {
-      vm.online = false;
-      vm.showAlert = true;
-    });
+      vm.sseClient.on('error', () => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
 
-    vm.sseClient.on('execution_update', this.handleUpdate);
-    vm.sseClient.on('execution_delete', this.handleDelete);
-    vm.sseClient.on('execution_patch', this.handlePatch);
-    vm.sseClient.on('execution_create', this.handleCreate);
+      vm.sseClient.on('execution_update', this.handleUpdate);
+      vm.sseClient.on('execution_delete', this.handleDelete);
+      vm.sseClient.on('execution_patch', this.handlePatch);
+      vm.sseClient.on('execution_create', this.handleCreate);
 
-    vm.sseClient.connect().then(() => {
-      vm.online = true;
-      vm.showAlert = false;
-    }).catch(() => {
-      vm.online = false;
-      vm.showAlert = true;
-    });
+      vm.sseClient.connect().then(() => {
+        vm.online = true;
+        vm.showAlert = false;
+      }).catch(() => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
+    }
   },
 
   methods: {
@@ -73,7 +75,9 @@ export default {
   },
 
   beforeDestroy() {
-    this.sseClient.disconnect();
+    if (this.sseClient) {
+      this.sseClient.disconnect();
+    }
   },
 };
 </script>

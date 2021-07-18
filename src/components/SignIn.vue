@@ -154,29 +154,33 @@ export default {
   mounted() {
     const vm = this;
 
-    vm.sseClient = vm.$sse.create({
-      format: 'json',
-      polyfill: true,
-      url: `${process.env.CACAHUATE_URL}/stream`,
-      withCredentials: true,
-    });
+    if (process.env.SSE_ENABLED) {
+      vm.sseClient = vm.$sse.create({
+        format: 'json',
+        polyfill: true,
+        url: `${process.env.CACAHUATE_URL}/stream`,
+        withCredentials: true,
+      });
 
-    vm.sseClient.on('error', () => {
-      vm.online = false;
-      vm.showAlert = true;
-    });
+      vm.sseClient.on('error', () => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
 
-    vm.sseClient.connect().then(() => {
-      vm.online = true;
-      vm.showAlert = false;
-    }).catch(() => {
-      vm.online = false;
-      vm.showAlert = true;
-    });
+      vm.sseClient.connect().then(() => {
+        vm.online = true;
+        vm.showAlert = false;
+      }).catch(() => {
+        vm.online = false;
+        vm.showAlert = true;
+      });
+    }
   },
 
   beforeDestroy() {
-    this.sseClient.disconnect();
+    if (this.sseClient) {
+      this.sseClient.disconnect();
+    }
   },
 };
 </script>

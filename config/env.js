@@ -16,6 +16,9 @@ const envVars = [{
   name: 'LOCALE',
   default: 'es',
 }, {
+  name: 'SSE_ENABLED',
+  default: false,
+}, {
   name: 'PAGE_SIZE',
   default: 100000,
 }];
